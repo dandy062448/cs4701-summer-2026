@@ -45,8 +45,40 @@ def uninformed_search(grid, start, goal, mode: PathPlanMode):
     expanded = []
     reached = {start: None}
 
-    # TODO:
+    is_goal = False
+
+    while frontier:
+        frontier_sizes.append(len(frontier))
+
+        if mode == PathPlanMode.DFS:
+            # prioritize latest frontier nodes, which have higher depth.
+            current = frontier.pop()
+        elif mode == PathPlanMode.BFS:
+            # prioritize earliest frontier nodes with lowest depth.
+            current = frontier.pop(0)
+        else:
+            print("Error: invalid mode.")
+
+        expanded.append(current)
+        
+        if current == goal:
+            is_goal = True
+            break
+        
+        for child in expand(grid, current):
+            if child not in reached:
+                frontier.append(child)
+                reached[child] = current
+
+    # Find goal path by starting at goal node and backstepping.
     path = []
+    if is_goal:
+        node = goal
+        while node is not None:
+            path.append(node)
+            node = reached[node]
+    path.reverse()
+    
     return path, expanded, frontier_sizes
 
 
@@ -58,7 +90,7 @@ def a_star(grid, start, goal, mode: PathPlanMode, heuristic: Heuristic, width):
         grid (numpy): NxN numpy array representing the world,
         with terrain features encoded as integers.
         start (tuple): The starting cell of the path.
-        goal (tuple): The ending cell of the path.
+        goal (tuple): The ending cell of the path.a
         mode (PathPlanMode): The search strategy to use. Must
         specify either PathPlanMode.A_STAR or
         PathPlanMode.BEAM_SEARCH.
