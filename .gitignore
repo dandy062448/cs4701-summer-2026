@@ -1,3 +1,6 @@
 # get your own virtual environments!
 venv/
 .venv/
+
+# OS files
+.DS_Store
