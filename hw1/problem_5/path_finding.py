@@ -16,9 +16,20 @@ def compute_heuristic(node, goal, heuristic: Heuristic):
         h (float): The heuristic value.
 
     """
-    # TODO:
+    minimum_cost = 0.5 # cost of traversing through desert
 
-    return 0
+
+    delta_x = goal[0] - node[0]
+    delta_y = goal[1] - node[1]
+
+    if heuristic == Heuristic.MANHATTAN:
+        return minimum_cost * abs(delta_x) + abs(delta_y)
+    elif heuristic == Heuristic.EUCLIDEAN:
+        return minimum_cost * ((delta_x) ** 2 + (delta_y) ** 2) ** (1 / 2)
+    else:
+        print('Error: Invalid heuristic.')
+        return 0
+
 
 
 def uninformed_search(grid, start, goal, mode: PathPlanMode):
