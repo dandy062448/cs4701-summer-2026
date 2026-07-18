@@ -82,8 +82,8 @@ def num_errors(board):
     digits = range(1, N+1)
     errors = 0
     for i in range(N):
-        errors += N - np.sum(np.in1d(digits, board[i]))
-        errors += N - np.sum(np.in1d(digits, board[:, i]))
+        errors += N - np.sum(np.isin(digits, board[i]))
+        errors += N - np.sum(np.isin(digits, board[:, i]))
     return errors
 
 
@@ -100,9 +100,29 @@ def simulated_annealing(board, clues, startT, decay, tol=1e-4):
     Returns:
         board (numpy): NumPy array representing the final sudoku board.
     """
-    # TODO:
 
-    return board
+    current = board
+    iter = 0
+    # errors_per_iter = []
+
+    while (True):
+        # errors_per_iter.append(num_errors(current))
+        if (num_errors(current) == 0):
+            return current
+        T = startT * (decay**iter)
+        if (T < tol):
+            return current
+        
+        next = random.choice(successors(current, clues))
+        energy_difference = num_errors(next) - num_errors(current)
+        if (energy_difference < 0):
+            current = next
+        else:
+            annealing_probability = np.e ** (-energy_difference / T)
+            if (random.random() < annealing_probability):
+                current = next
+        iter += 1
+
 
 
 def main():
