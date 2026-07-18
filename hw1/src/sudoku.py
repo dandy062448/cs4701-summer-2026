@@ -105,17 +105,20 @@ def simulated_annealing(board, clues, startT, decay, tol=1e-4):
     iter = 0
     # errors_per_iter = []
 
-    while (True):
+    while True:
         # errors_per_iter.append(num_errors(current))
-        if (num_errors(current) == 0):
+        if num_errors(current) == 0:
             return current
         T = startT * (decay**iter)
-        if (T < tol):
+        if T < tol:
             return current
         
-        next = random.choice(successors(current, clues))
+        next_options = successors(current, clues)
+        if not next_options:
+            return current
+        next = random.choice(next_options)
         energy_difference = num_errors(next) - num_errors(current)
-        if (energy_difference < 0):
+        if energy_difference < 0:
             current = next
         else:
             annealing_probability = np.e ** (-energy_difference / T)
