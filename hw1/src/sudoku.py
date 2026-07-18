@@ -106,12 +106,12 @@ def simulated_annealing(board, clues, startT, decay, tol=1e-4):
     errors_per_iter = []
 
     while True:
-        # errors_per_iter.append(num_errors(current))
+        errors_per_iter.append(num_errors(current))
         if num_errors(current) == 0:
-            return current
+            return current, errors_per_iter
         T = startT * (decay**iter)
         if T < tol:
-            return current
+            return current, errors_per_iter
         
         next_options = successors(current, clues)
         if not next_options:
@@ -139,7 +139,6 @@ def plot_annealing_history(history, grid_size, clues, starting_t, decay):
     ax.grid()
 
     fig.savefig("individual.png")
-    plt.show()
 
 
 def plot_error_histogram(final_errors, grid_size, clues, starting_t, decay, batch_size):
@@ -152,7 +151,6 @@ def plot_error_histogram(final_errors, grid_size, clues, starting_t, decay, batc
     plt.title(title)
 
     plt.savefig("batch.png")
-    plt.show()
 
 
 def main():
