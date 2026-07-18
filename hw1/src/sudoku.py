@@ -103,7 +103,7 @@ def simulated_annealing(board, clues, startT, decay, tol=1e-4):
 
     current = board
     iter = 0
-    # errors_per_iter = []
+    errors_per_iter = []
 
     while True:
         # errors_per_iter.append(num_errors(current))
@@ -126,6 +126,33 @@ def simulated_annealing(board, clues, startT, decay, tol=1e-4):
                 current = next
         iter += 1
 
+
+def plot_annealing_history(history, grid_size, clues, starting_t, decay):
+    # Helper function to plot a single simulated annealing process.
+    fig, ax = plt.subplots()
+    x_axis = range(len(history))
+    ax.plot(x_axis, history)
+    title = f"Error History of Individual Simulated Annealing Search\n" \
+            f"(n = {grid_size}, c = {clues}, s = {starting_t}, d = {decay})"
+    ax.set(xlabel='States from Original', ylabel='Missing Values',
+        title=title)
+    ax.grid()
+
+    fig.savefig("individual.png")
+    plt.show()
+
+
+def plot_error_histogram(final_errors, grid_size, clues, starting_t, decay, batch_size):
+    plt.hist(final_errors, bins = np.arange(max(final_errors) + 1))
+    plt.xlabel('Errors')
+    plt.ylabel('Number of Searches')
+    batch_size = len(final_errors) 
+    title = f"Error Distribution for {batch_size} Searches\n" \
+            f"(n = {grid_size}, c = {clues}, s = {starting_t}, d = {decay})"
+    plt.title(title)
+
+    plt.savefig("batch.png")
+    plt.show()
 
 
 def main():
@@ -153,16 +180,19 @@ def main():
     if args.b is None:
         board, clues = generate(args.n, args.c)
         print("Sudoku puzzle:\n", board, "\n")
-        sol = simulated_annealing(initialize(board), clues, args.s, args.d)
+        sol, errors_list = simulated_annealing(initialize(board), clues, args.s, args.d)
         print(sol)
         print("Number of errors: ", num_errors(sol))
+        plot_annealing_history(errors_list, args.n, args.c, args.s, args.d)
     else:
         final_errors = []
         for i in range(args.b):
             board, clues = generate(args.n, args.c)
-            sol = simulated_annealing(initialize(board), clues, args.s, args.d)
-            final_errors.append(num_errors(sol))
+            sol, _ = simulated_annealing(initialize(board), clues, args.s, args.d)
+            final_errors.append(int(num_errors(sol)))
         print("Number of errors after each run: ", final_errors)
+        print("Number of runs with 0 errors: ", final_errors.count(0))
+        plot_error_histogram(final_errors, args.n, args.c, args.s, args.d, args.b)
 
 if __name__ == "__main__":
     main()
