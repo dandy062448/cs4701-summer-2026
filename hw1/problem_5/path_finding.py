@@ -23,9 +23,9 @@ def compute_heuristic(node, goal, heuristic: Heuristic):
     delta_y = goal[1] - node[1]
 
     if heuristic == Heuristic.MANHATTAN:
-        return minimum_cost * abs(delta_x) + abs(delta_y)
+        return minimum_cost * (1 / 2) * (abs(delta_x) + abs(delta_y))
     elif heuristic == Heuristic.EUCLIDEAN:
-        return minimum_cost * ((delta_x) ** 2 + (delta_y) ** 2) ** (1 / 2)
+        return minimum_cost * (1 / np.sqrt(2)) * np.sqrt((delta_x) ** 2 + (delta_y) ** 2) 
     else:
         print('Error: Invalid heuristic.')
         return 0
@@ -123,8 +123,43 @@ def a_star(grid, start, goal, mode: PathPlanMode, heuristic: Heuristic, width):
     expanded = []
     reached = {start: {"cost": cost(grid, start), "parent": None}}
 
-    # TODO:
+    is_goal = False
+
+    while not frontier.empty():
+        frontier_sizes.append(frontier.qsize())
+
+        _, current = frontier.get()
+        expanded.append(current)
+
+        if current == goal:
+            is_goal = True
+            break
+
+        for child in expand(grid, current):
+            new_path_cost = reached[current]["cost"] + cost(grid, child)
+            if child not in reached or new_path_cost < reached[child]["cost"]:
+                reached[child] = {"cost": new_path_cost, "parent": current}
+                priority = new_path_cost + compute_heuristic(child, goal, heuristic)
+                frontier.put((priority, child))
+
+        if mode == PathPlanMode.BEAM_SEARCH:
+            candidates = []
+            while not frontier.empty():
+                candidates.append(frontier.get())
+
+            candidates.sort(key = lambda x: x[0])
+
+            for item in candidates[:width]:
+                frontier.put(item)
+
     path = []
+    if is_goal:
+        node = goal
+        while node is not None:
+            path.append(node)
+            node = reached[node]["parent"]
+        path.reverse()
+    
     return path, expanded, frontier_sizes
 
 
