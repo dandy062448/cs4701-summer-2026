@@ -21,6 +21,15 @@ def max_value(state, player, alpha, beta):
         move (tuple): Best move to make
     """
     # TODO
+
+    # value
+    # action
+
+    # For all legal moves (in what order?)
+    # compute next_utility = min_value(legal_state, player % 2 + 1, alpha, beta)
+    # if next_utility is greater than alpha?
+        # value = next_utility
+    # if next_uti
     return -float("inf"), None
 
 
