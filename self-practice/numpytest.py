@@ -45,6 +45,35 @@ import numpy as np
 # print(f"Sax: {sax}")
 
 ### Boolean masks
-names = np.array(['Bill','Mike','Tom','Kathy','Giovanni','Catherine'])
-bonus = np.array([232300.56,478123.45,3891.24,98012.36,52123.50,0])
-print(names[bonus > 130000])
+# names = np.array(['Bill','Mike','Tom','Kathy','Giovanni','Catherine'])
+# bonus = np.array([232300.56,478123.45,3891.24,98012.36,52123.50,0])
+# print(names[bonus > 130000])
+
+
+### Multi-dimensional arrays 
+nonsingular = np.array([
+                        (1, 0), 
+                        (1, 1)
+                        ])
+
+# parentheses types are interchangable for multi-dimensional arrays.
+nonsingular2 = np.array([
+                        [1, 0], 
+                        (1, 1)
+                        ], dtype = int)    
+# array dimensions must be consistent. This will raise a ValueError:
+# invalidmatrix = np.array([ (1, 0), (0) ])
+
+# automatic type casting occurs for mixed types.
+validmatrix = np.array([
+                        (1, 0),
+                        ('we are', "strings!")
+                        ])
+
+print(f"{nonsingular}\n{nonsingular2}\n{validmatrix}")
+
+c = np.array([
+        [(1.5,2,3), (4,5,6)],
+        [(3,2,1), (4,5,6)]
+            ], dtype = float)
+
