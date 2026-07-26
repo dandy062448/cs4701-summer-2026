@@ -4,3 +4,6 @@ venv/
 
 # OS files
 .DS_Store
+
+# Pycache
+__pycache__/

@@ -8,6 +8,11 @@ import numpy as np
 from six.moves import input
 from othello_shared import get_possible_moves, play_move, compute_utility
 
+def switch_player(player):
+    """
+    Alternate between dark (1) and light (2) players.
+    """
+    return player % 2 + 1
 
 def max_value(state, player, alpha, beta):
     """
@@ -20,17 +25,21 @@ def max_value(state, player, alpha, beta):
         value (int): Minimax value of state
         move (tuple): Best move to make
     """
-    # TODO
+    if not get_possible_moves(state, player):
+        return compute_utility(state), None
 
-    # value
-    # action
+    value = -float("inf")
+    for possible_move in get_possible_moves(state, player):
+        next_state = play_move(state, player, possible_move[0], possible_move[1])
+        next_value, _ = min_value(next_state, switch_player(player), alpha, beta)
+        if next_value > value:
+            value = next_value
+            move = possible_move
+            alpha = max(alpha, value)
+        if value >= beta:
+            return value, move
+    return value, move
 
-    # For all legal moves (in what order?)
-    # compute next_utility = min_value(legal_state, player % 2 + 1, alpha, beta)
-    # if next_utility is greater than alpha?
-        # value = next_utility
-    # if next_uti
-    return -float("inf"), None
 
 
 def min_value(state, player, alpha, beta):
@@ -44,8 +53,20 @@ def min_value(state, player, alpha, beta):
         value (int): Minimax value of state
         move (tuple): Best move to make
     """
-    # TODO
-    return float("inf"), None
+    if not get_possible_moves(state, player):
+        return compute_utility(state), None
+
+    value = float("inf")
+    for possible_move in get_possible_moves(state, player):
+        next_state = play_move(state, player, possible_move[0], possible_move[1])
+        next_value, _ = max_value(next_state, switch_player(player), alpha, beta)
+        if next_value < value:
+            value = next_value
+            move = possible_move
+            beta = min(beta, value)
+        if value <= alpha:
+            return value, move
+    return value, move
 
 
 def minimax(state, player):
