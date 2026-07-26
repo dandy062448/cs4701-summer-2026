@@ -14,6 +14,7 @@ def switch_player(player):
     """
     return player % 2 + 1
 
+
 def max_value(state, player, alpha, beta):
     """
     Args:
@@ -40,7 +41,6 @@ def max_value(state, player, alpha, beta):
         if value >= beta:
             return value, move
     return value, move
-
 
 
 def min_value(state, player, alpha, beta):

@@ -15,6 +15,7 @@ def switch_player(player):
     """
     return player % 2 + 1
 
+
 class Node:
     def __init__(self, state, player, parent, children, v=0, N=0):
         self.state = state
