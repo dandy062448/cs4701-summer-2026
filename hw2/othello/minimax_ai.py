@@ -25,11 +25,12 @@ def max_value(state, player, alpha, beta):
         value (int): Minimax value of state
         move (tuple): Best move to make
     """
-    if not get_possible_moves(state, player):
+    moves = get_possible_moves(state, player)
+    if not moves:
         return compute_utility(state), None
 
     value = -float("inf")
-    for possible_move in get_possible_moves(state, player):
+    for possible_move in moves:
         next_state = play_move(state, player, possible_move[0], possible_move[1])
         next_value, _ = min_value(next_state, switch_player(player), alpha, beta)
         if next_value > value:
@@ -53,11 +54,12 @@ def min_value(state, player, alpha, beta):
         value (int): Minimax value of state
         move (tuple): Best move to make
     """
-    if not get_possible_moves(state, player):
+    moves = get_possible_moves(state, player)
+    if not moves:
         return compute_utility(state), None
 
     value = float("inf")
-    for possible_move in get_possible_moves(state, player):
+    for possible_move in moves:
         next_state = play_move(state, player, possible_move[0], possible_move[1])
         next_value, _ = max_value(next_state, switch_player(player), alpha, beta)
         if next_value < value:
