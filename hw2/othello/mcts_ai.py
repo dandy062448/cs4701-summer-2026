@@ -9,6 +9,11 @@ import numpy as np
 from six.moves import input
 from othello_shared import get_possible_moves, play_move, compute_utility
 
+def switch_player(player):
+    """
+    Alternate between dark (1) and light (2) players.
+    """
+    return player % 2 + 1
 
 class Node:
     def __init__(self, state, player, parent, children, v=0, N=0):
@@ -37,8 +42,29 @@ def select(root, alpha):
     Returns:
         node (Node): Node at bottom of MCTS tree
     """
-    # TODO:
-    return root
+    node = root
+
+    while True:
+        moves = get_possible_moves(node.state, node.player)
+        if not moves:
+            return node
+
+        for move in moves:
+            successor = play_move(node.state, node.player, move[0], move[1])
+            if node.get_child(successor) is None:
+                return node
+
+        best_child = None
+        best_uct = -float("inf")
+        for child in node.children:
+            exploit_factor = child.value / child.N
+            explore_factor = alpha * np.sqrt(np.log(node.N) / child.N)
+            uct = exploit_factor + explore_factor
+            if uct > best_uct:
+                best_uct = uct
+                best_child = child
+
+        node = best_child
 
 
 def expand(node):
@@ -50,7 +76,17 @@ def expand(node):
     Returns:
         leaf (Node): Newly created node (or given Node if already leaf)
     """
-    # TODO:
+    moves = get_possible_moves(node.state, node.player)
+    if not moves:
+        return node
+
+    for move in moves:
+        successor = play_move(node.state, node.player, move[0], move[1])
+        if node.get_child(successor) is None:
+            child = Node(successor, switch_player(node.player), node, [])
+            node.children.append(child)
+            return child
+
     return node
 
 
@@ -64,8 +100,24 @@ def simulate(node):
     Returns:
         utility (int): Utility of final state
     """
-    # TODO:
-    return 0
+    state = node.state
+    player = node.player
+
+    while True:
+        moves = get_possible_moves(state, player)
+        if not moves:
+            next_player = switch_player(player)
+            next_moves = get_possible_moves(state, next_player)
+            if not next_moves:
+                break
+            player = next_player
+            continue
+
+        move = random.choice(moves)
+        state = play_move(state, player, move[0], move[1])
+        player = switch_player(player)
+
+    return compute_utility(state)
 
 
 def backprop(node, utility):
@@ -78,8 +130,14 @@ def backprop(node, utility):
         node (Node): Leaf node from which rollout started.
         utility (int): Utility of simulated rollout.
     """
-    # TODO:
-    return
+    current = node
+    while current is not None:
+        current.N += 1
+        if current.player == 1:
+            current.value -= utility
+        else:
+            current.value += utility
+        current = current.parent
 
 
 def mcts(state, player, rollouts=100, alpha=5):
