@@ -36,20 +36,31 @@ class RL_Agent(object):
 
     def choose_action(self, state, valid_actions):
         """ Choose an action using epsilon-greedy selection.
-
+ 
         Args:
             state (tuple): Current robot state.
             valid_actions (list): A list of possible actions.
         Returns:
             action (string): Action chosen from valid_actions.
         """
-        # TODO
-        return None
-
-
+        if not valid_actions:
+            return None
+ 
+        if random.random() < self.epsilon:
+            # Explore: pick uniformly at random among valid actions.
+            return random.choice(valid_actions)
+ 
+        # Exploit: pick the action(s) with the highest Q-value, breaking
+        # ties randomly so the agent doesn't get stuck always picking the
+        # first max it happens to see.
+        best_value = max(self.Qvalues[(state, a)] for a in valid_actions)
+        best_actions = [a for a in valid_actions if self.Qvalues[(state, a)] == best_value]
+        return random.choice(best_actions)
+ 
+ 
     def update(self, state, action, reward, successor, valid_actions):
         """ Update self.Qvalues for (state, action) given reward and successor.
-
+ 
         Args:
             state (tuple): Current robot state.
             action (string): Action taken at state.
@@ -57,5 +68,12 @@ class RL_Agent(object):
             successor (tuple): Successor state.
             valid_actions (list): A list of possible actions at successor state.
         """
-        # TODO
-        pass
+        if successor is None or not valid_actions:
+            # Terminal successor: no future reward available.
+            best_next_q = 0
+        else:
+            best_next_q = max(self.Qvalues[(successor, a)] for a in valid_actions)
+ 
+        sample = reward + self.gamma * best_next_q
+        old_q = self.Qvalues[(state, action)]
+        self.Qvalues[(state, action)] = (1 - self.alpha) * old_q + self.alpha * sample
