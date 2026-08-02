@@ -47,14 +47,18 @@ class RL_Agent(object):
             return None
  
         if random.random() < self.epsilon:
-            # Explore: pick uniformly at random among valid actions.
             return random.choice(valid_actions)
  
-        # Exploit: pick the action(s) with the highest Q-value, breaking
-        # ties randomly so the agent doesn't get stuck always picking the
-        # first max it happens to see.
-        best_value = max(self.Qvalues[(state, a)] for a in valid_actions)
-        best_actions = [a for a in valid_actions if self.Qvalues[(state, a)] == best_value]
+        # computes best actions and selects one randomly in the event of ties.
+        best_value = -float('inf')
+        for action in valid_actions:
+            best_value = max(best_value, self.Qvalues[(state, action)])
+
+        best_actions = []
+        for action in valid_actions:
+            if self.Qvalues[(state, action)] == best_value:
+                best_actions.append(action)
+
         return random.choice(best_actions)
  
  
@@ -69,10 +73,12 @@ class RL_Agent(object):
             valid_actions (list): A list of possible actions at successor state.
         """
         if successor is None or not valid_actions:
-            # Terminal successor: no future reward available.
+            # terminal successor
             best_next_q = 0
         else:
-            best_next_q = max(self.Qvalues[(successor, a)] for a in valid_actions)
+            best_next_q = -float('inf')
+            for a in valid_actions:
+                best_next_q = max(best_next_q, self.Qvalues[(successor, a)])
  
         sample = reward + self.gamma * best_next_q
         old_q = self.Qvalues[(state, action)]
