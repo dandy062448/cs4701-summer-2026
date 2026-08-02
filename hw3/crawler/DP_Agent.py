@@ -69,7 +69,7 @@ class DP_Agent(object):
                 action = self.policy[state]
                 new_value = self.compute_value(state, action, transition)
 
-                if new_value - self.values[state] > VALUE_CONVERGENCE_THRESHOLD:
+                if abs(new_value - self.values[state]) > VALUE_CONVERGENCE_THRESHOLD:
                     convergent = False
 
                 self.values[state] = new_value
