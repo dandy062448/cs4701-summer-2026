@@ -130,8 +130,17 @@ class Gridworld_HMM:
         Returns:
           np.ndarray: Estimated belief state at each timestep.
         """
-        # TODO
-        return np.zeros((len(observations), self.grid.size))
+        beliefs = np.zeros((len(observations), self.grid.size))
+
+        belief = self.init
+        for t, observation in enumerate(observations):
+            belief = np.dot(belief,self.trans)
+            belief = belief * self.obs[observation]
+            # normalize
+            belief = belief / np.sum(belief)
+            beliefs[t] = belief
+
+        return beliefs
 
 
     """
@@ -143,8 +152,10 @@ class Gridworld_HMM:
         Sample the transition matrix for all particles.
         Update self.particles in place.
         """
-        # TODO
-        pass
+        for i, particle in enumerate(self.particles):
+            self.particles[i] = np.random.choice(
+                self.grid.size, p=self.trans[particle]
+            )
 
     def observe(self, observation):
         """
@@ -153,16 +164,22 @@ class Gridworld_HMM:
         Args:
           obs (int): Integer observation value.
         """
-        # TODO
-        pass
+        self.weights = self.obs[observation, self.particles]
+
 
     def resample(self):
         """
         Resample all particles.
         Update self.particles and self.weights in place.
         """
-        # TODO
-        pass
+        total_weight = np.sum(self.weights)
+        probs = self.weights / total_weight
+
+        self.particles = np.random.choice(
+            self.particles, size=len(self.particles), p=probs
+        )
+        self.weights = np.ones(len(self.particles))
+
 
     def particle_filter(self, observations: list[int]):
         """Apply particle filter over all observations.
@@ -171,5 +188,13 @@ class Gridworld_HMM:
         Returns:
           np.ndarray: Counts of particles in each state at each timestep.
         """
-        # TODO
-        return np.zeros((len(observations), self.grid.size))
+        counts = np.zeros((len(observations), self.grid.size))
+
+        for t, obs in enumerate(observations):
+            self.transition()
+            self.observe(obs)
+            self.resample()
+            for p in self.particles:
+                counts[t][p] += 1
+
+        return counts
