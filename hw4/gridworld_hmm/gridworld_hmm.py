@@ -34,19 +34,89 @@ class Gridworld_HMM:
     4.1 and 4.2. Transition and observation probabilities
     """
 
+    def row_to_grid_index(self, row_index):
+        """
+        Helper function that returns the corresponding grid coordinates 
+        given a row index of an NxN transition matrix.
+        """
+        _, row_size = self.grid.shape
+        return [row_index // row_size, row_index % row_size]
+
+
+    def grid_to_row_index(self, grid_tuple):
+        """
+        Helper function that returns the corresponding row index of an NxN transition matrix 
+        given a grid coordinate.
+        """
+        _, row_size = self.grid.shape
+        return grid_tuple[0] * row_size + grid_tuple[1]
+
+
+    @staticmethod
+    def get_adjacent(cell):
+        """
+        Helper function that returns cells to the north, east, south, and west of the 
+        given cell respectively.
+        """
+        i, j = cell
+        return [(i - 1, j), (i, j + 1), (i + 1, j),(i, j - 1)]
+
+
     def initT(self):
         """
         Create and return NxN transition matrix, where N = size of grid.
         """
-        # TODO
-        return np.ones((self.grid.size, self.grid.size)) / self.grid.size
+        print(self.grid)
+        grid = np.zeros((self.grid.size, self.grid.size))
+
+        for row_index in range(self.grid.size):
+            grid_element = self.row_to_grid_index(row_index)
+            neighbors = self.neighbors(grid_element)
+            # print(f"neighbors of {grid_element}: {neighbors}")
+
+            for neighbor in neighbors:
+                neighbor_index = self.grid_to_row_index(neighbor)
+                grid[row_index][neighbor_index] = 1 / len(neighbors)
+
+        # print(grid)
+        return grid
+
 
     def initO(self):
         """
         Create and return 16xN matrix of observation probabilities, where N = size of grid.
         """
-        # TODO
-        return np.ones((16, self.grid.size)) / 16
+        correct_observations = []
+
+        for row_index in range(self.grid.size):
+            grid_element = self.row_to_grid_index(row_index)
+            neighbors = self.neighbors(grid_element)
+            current_cell = neighbors[0]
+            # print(f"current cell: {current_cell}")
+
+            observation_binary = ""
+            adjacent_cells = Gridworld_HMM.get_adjacent(current_cell)
+            # print(f"adjacent cells: {adjacent_cells}")
+            for cell in adjacent_cells:
+                if cell in neighbors:
+                    observation_binary += "1"
+                else:
+                    observation_binary += "0"
+
+            observation = int(observation_binary, 2)
+            correct_observations.append(observation)
+
+        observation_probabilities = np.zeros((16, self.grid.size))
+        for i in range(16):
+            for j in range(self.grid.size):
+                discrepancy = bin(i ^ correct_observations[j]).count('1')
+                observation_probabilities[i][j] = \
+                    self.epsilon ** discrepancy * (1 - self.epsilon) ** (4 - discrepancy)
+
+        # sanity check: columns add to 1
+        # for i in range(self.grid.size):
+            # print(sum(observation_probabilities[:, i]))
+        return observation_probabilities
 
 
     """

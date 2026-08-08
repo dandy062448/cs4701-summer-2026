@@ -20,7 +20,7 @@ def inference(shape, walls, epsilons, T, N, m, p):
 
     for e in range(len(epsilons)):
         env = Gridworld_HMM(shape, epsilons[e], walls, p)
-        cells = np.nonzero(env.grid == 0)
+        cells = np.nonzero(env.grid == 1)
         indices = cells[0] * env.grid.shape[1] + cells[1]
 
         for n in range(N):
